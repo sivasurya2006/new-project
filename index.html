@@ -1,1 +1,222 @@
 
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator — Fast, Customizable & Beautiful</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-qrcode"></i>
+        </div>
+        <div>
+          <h1>QR Spark</h1>
+          <p class="subtitle">Instant, beautiful and customizable QR code generator</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+          <i class="fa-solid fa-sun light-icon"></i>
+          <i class="fa-solid fa-moon dark-icon"></i>
+        </button>
+        <button id="historyToggleBtn" class="btn-icon" title="View Recent QR Codes" aria-label="View History">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span class="history-badge" id="historyCount">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="main-grid">
+      <!-- Input & Configuration Card -->
+      <section class="card config-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-sliders"></i> Configuration</h2>
+          <span class="badge">Options</span>
+        </div>
+
+        <!-- Input Section -->
+        <div class="form-group">
+          <label for="qrInput">Enter Text or Website URL <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-link input-icon"></i>
+            <input
+              type="text"
+              id="qrInput"
+              placeholder="e.g. https://example.com or Your message"
+              autocomplete="off"
+            />
+            <button id="clearInputBtn" class="btn-clear" title="Clear input" aria-label="Clear Input">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="input-info">
+            <span id="charCounter">0 characters</span>
+            <span id="inputError" class="error-text"></span>
+          </div>
+        </div>
+
+        <!-- Customization Controls (Level 2) -->
+        <div class="customization-section">
+          <h3 class="section-title"><i class="fa-solid fa-palette"></i> Style & Customization</h3>
+          
+          <div class="settings-grid">
+            <!-- QR Size -->
+            <div class="form-group">
+              <label for="qrSize">QR Size</label>
+              <div class="select-wrapper">
+                <select id="qrSize">
+                  <option value="150">150 × 150 px</option>
+                  <option value="200">200 × 200 px</option>
+                  <option value="300" selected>300 × 300 px</option>
+                  <option value="400">400 × 400 px</option>
+                </select>
+                <i class="fa-solid fa-chevron-down select-icon"></i>
+              </div>
+            </div>
+
+            <!-- Error Correction Level -->
+            <div class="form-group">
+              <label for="qrCorrection">Correction Level</label>
+              <div class="select-wrapper">
+                <select id="qrCorrection">
+                  <option value="L">Low (7%)</option>
+                  <option value="M" selected>Medium (15%)</option>
+                  <option value="Q">Quartile (25%)</option>
+                  <option value="H">High (30%)</option>
+                </select>
+                <i class="fa-solid fa-chevron-down select-icon"></i>
+              </div>
+            </div>
+
+            <!-- QR Foreground Color -->
+            <div class="form-group">
+              <label for="qrColor">QR Code Color</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="qrColor" value="#0f172a" />
+                <span class="color-hex" id="qrColorHex">#0f172a</span>
+              </div>
+            </div>
+
+            <!-- Background Color -->
+            <div class="form-group">
+              <label for="qrBgColor">Background Color</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="qrBgColor" value="#ffffff" />
+                <span class="color-hex" id="qrBgColorHex">#ffffff</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button id="generateBtn" class="btn btn-primary">
+            <i class="fa-solid fa-bolt"></i> Generate QR Code
+          </button>
+          <button id="resetAllBtn" class="btn btn-secondary" title="Reset all settings to default">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+        </div>
+      </section>
+
+      <!-- Output / Preview Card -->
+      <section class="card preview-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-eye"></i> QR Preview</h2>
+          <span class="badge" id="statusBadge">Ready</span>
+        </div>
+
+        <div class="qr-display-container" id="qrDisplayContainer">
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon-wrap">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h3>Your QR Code will appear here</h3>
+            <p>Type text or enter a URL on the left and click <strong>Generate</strong> or press <kbd>Enter</kbd></p>
+          </div>
+
+          <!-- Loading State -->
+          <div class="loading-state hidden" id="loadingState">
+            <div class="spinner"></div>
+            <p>Generating high-resolution QR...</p>
+          </div>
+
+          <!-- QR Output Wrapper -->
+          <div class="qr-canvas-wrapper hidden" id="qrWrapper">
+            <div id="qrCanvasContainer" class="canvas-frame"></div>
+            <div class="qr-meta" id="qrMeta"></div>
+          </div>
+        </div>
+
+        <!-- Download & Sharing Section -->
+        <div class="download-section hidden" id="downloadSection">
+          <button id="downloadPngBtn" class="btn btn-download">
+            <i class="fa-solid fa-download"></i> Download PNG
+          </button>
+          <div class="sub-actions">
+            <button id="copyUrlBtn" class="btn btn-sub" title="Copy Content text or URL">
+              <i class="fa-solid fa-copy"></i> Copy Text
+            </button>
+            <button id="copyImageBtn" class="btn btn-sub" title="Copy QR Image to Clipboard">
+              <i class="fa-regular fa-image"></i> Copy Image
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- History Drawer (Level 3) -->
+    <aside class="history-drawer" id="historyDrawer">
+      <div class="history-header">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent QR Codes</h3>
+        <div class="history-header-actions">
+          <button id="clearHistoryBtn" class="btn-text-danger" title="Clear all history">Clear All</button>
+          <button id="closeHistoryBtn" class="btn-icon-small" aria-label="Close History">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">
+          <i class="fa-regular fa-folder-open"></i>
+          <p>No recent QR codes saved yet.</p>
+        </div>
+      </div>
+    </aside>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+      <i class="fa-solid fa-circle-check toast-icon"></i>
+      <span class="toast-message" id="toastMessage">Action completed!</span>
+    </div>
+  </div>
+
+  <!-- Client-side QR code generator library (local offline copy + cdn fallback) -->
+  <script src="qrcode.min.js"></script>
+  <script>
+    if (typeof QRCode === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\\/script>');
+    }
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
